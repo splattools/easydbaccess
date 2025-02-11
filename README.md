@@ -9,6 +9,7 @@ USERNAME='ユーザ名'
 PASSWORD='パスワード'
 HOST='ホスト名(AWSでいえばRDSのDNS)'
 DB_NAME='接続DB名'
+DB_TYPE='mysql' # or 'postgresql'
 ```
 
 flaskは5000番ポートで受け付けるようにしているので注意してください

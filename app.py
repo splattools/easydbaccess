@@ -32,6 +32,22 @@ def users():
     if request.method == 'POST':
         name = request.form.get('name')
         email = request.form.get('email')
+        db_type = request.form.get('db_type')
+        if db_type == 'postgresql':
+            app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://{user}:{password}@{host}/{db-name}'.format(**{
+                'user': os.getenv('USERNAME'),
+                'password': os.getenv('PASSWORD'),
+                'host': os.getenv('HOST'),
+                'db-name': os.getenv('DB_NAME'),
+            })
+        else:
+            app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://{user}:{password}@{host}/{db-name}?charset=utf8'.format(**{
+                'user': os.getenv('USERNAME'),
+                'password': os.getenv('PASSWORD'),
+                'host': os.getenv('HOST'),
+                'db-name': os.getenv('DB_NAME'),
+            })
+        db.create_all()
         user = User(name=name, email=email)
         db.session.add(user)
         db.session.commit()
