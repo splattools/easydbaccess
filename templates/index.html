@@ -7,6 +7,12 @@
   <body>
     <h1>おためし接続</h1>
     <form action="/users" method="POST">
+      <label for="db_type">Database Type:</label>
+      <select name="db_type" id="db_type">
+        <option value="mysql">MySQL</option>
+        <option value="postgresql">PostgreSQL</option>
+      </select>
+      <br />
       <label for="name">Name:</label>
       <input type="text" name="name" id="name" />
       <br />

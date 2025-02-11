@@ -1,17 +1,34 @@
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
-from config import SQLALCHEMY_DATABASE_URI
+import os
 
 app = Flask(__name__)
 CORS(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-db = SQLAlchemy(app)
+db = None
 
 @app.before_request
 def before_request():
+    global db
+    if db is None:
+        db_type = request.form.get('db_type', 'mysql')
+        if db_type == 'postgresql':
+            app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://{user}:{password}@{host}/{db-name}'.format(**{
+                'user': os.getenv('USERNAME'),
+                'password': os.getenv('PASSWORD'),
+                'host': os.getenv('HOST'),
+                'db-name': os.getenv('DB_NAME'),
+            })
+        else:
+            app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://{user}:{password}@{host}/{db-name}?charset=utf8'.format(**{
+                'user': os.getenv('USERNAME'),
+                'password': os.getenv('PASSWORD'),
+                'host': os.getenv('HOST'),
+                'db-name': os.getenv('DB_NAME'),
+            })
+        db = SQLAlchemy(app)
     db.create_all()
 
 class User(db.Model):
@@ -32,6 +49,22 @@ def users():
     if request.method == 'POST':
         name = request.form.get('name')
         email = request.form.get('email')
+        db_type = request.form.get('db_type')
+        if db_type == 'postgresql':
+            app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://{user}:{password}@{host}/{db-name}'.format(**{
+                'user': os.getenv('USERNAME'),
+                'password': os.getenv('PASSWORD'),
+                'host': os.getenv('HOST'),
+                'db-name': os.getenv('DB_NAME'),
+            })
+        else:
+            app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://{user}:{password}@{host}/{db-name}?charset=utf8'.format(**{
+                'user': os.getenv('USERNAME'),
+                'password': os.getenv('PASSWORD'),
+                'host': os.getenv('HOST'),
+                'db-name': os.getenv('DB_NAME'),
+            })
+        db.create_all()
         user = User(name=name, email=email)
         db.session.add(user)
         db.session.commit()
